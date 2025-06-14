@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { checkOtpRestrictions, validateRegistrationData } from "../utils/auth.helper";
+import { checkOtpRestrictions, sendOtp, trackOtpRequests, validateRegistrationData } from "../utils/auth.helper";
 import prisma from "../../../../packages/libs/prisma";
 import { ValidationError } from "../../../../packages/error-handler";
 
 export const userRegistration=async(req:Request,res:Response,next:NextFunction)=>{
-    validateRegistrationData(req.body,"user") 
+    try {
+        validateRegistrationData(req.body,"user") 
     const {name,email}=req.body;
 
     const existingUser=await prisma.users.findUnique({where:email});
@@ -14,6 +15,18 @@ export const userRegistration=async(req:Request,res:Response,next:NextFunction)=
     }
 
     await checkOtpRestrictions(email,next);
+    await trackOtpRequests(email,next);
+
+    await sendOtp(name,email,"user-activation-mail");
+
+    res.status(200).json({
+        message:"OTP sent to your email! Please verify to complete registration"    
+
+    });
+    } catch (error) {
+        return next(error);
+        
+    }
 
 
 
