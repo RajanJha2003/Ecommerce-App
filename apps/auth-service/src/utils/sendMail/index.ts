@@ -30,7 +30,7 @@ const renderEmailTemplate=async(templateName:string,data:Record<string,any>):Pro
 // end an email using nodemailer
 
 
-export const sendMail=async(to:string,subject:string,templateName:string,data:Record<string,any>)=>{
+export const sendEmail=async(to:string,subject:string,templateName:string,data:Record<string,any>)=>{
     try {
         const html=await renderEmailTemplate(templateName,data);
 
